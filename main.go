@@ -108,22 +108,22 @@ func getDiskInfo() string {
 	}
 	out.ReadString('\n')
 
-	var memStr string = "<tr>"
+	var diskInfo string = ""
 	for {
 		line, err := out.ReadString('\n')
 		if err != nil {
 			break
 		}
 		tokens := strings.Split(line, " ")
+		diskInfo += "<tr>"
 		for _, t := range tokens {
 			if t != "" && t != "\t" {
-				memStr += "<td>" + t + "</td>"
+				diskInfo += "<td>" + t + "</td>"
 			}
 		}
+		diskInfo += "</tr>"
 	}
-	memStr += "</tr>"
-	println(memStr)
-	return memStr;
+	return diskInfo;
 }
 
 func getMemInfo() string {
