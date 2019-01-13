@@ -23,7 +23,7 @@ type Process struct {
 func main() {
 	sendMail()
 	c := cron.New()
-	spec := "0 0/1 * * * ?"
+	spec := "0 0/60 * * * ?"
 	c.AddFunc(spec, func() {
 		sendMail()
 	})
@@ -90,7 +90,7 @@ func sendMail() {
 		            ` + memStr + `
 		          
 		        </table>
-				<H1>进程信息(TOP 10)</H1>
+				<H1>进程信息</H1>
 				<table border="1" style="width: 80%;">
 		          <tr>
 		             <th>进程号</th>
