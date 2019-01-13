@@ -1,14 +1,14 @@
 package main
 
 import (
-	"./mail"
 	"bytes"
-	"fmt"
 	"log"
-	"os"
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
+	"os"
+	"fmt"
 )
 
 type Process struct {
@@ -20,9 +20,20 @@ type Process struct {
 
 
 func main() {
+	sendMail()
+	ticker:=time.NewTicker(time.Second*60 * 1)
+	go func() {        for _=range ticker.C {
+		sendMail()
+	}
+	}()
+	time.Sleep(time.Minute)
 
+
+
+}
+
+func sendMail() {
 	hostname, err := os.Hostname()
-
 	cmd := exec.Command("free", "-h")
 	var out bytes.Buffer
 	cmd.Stdout = &out
@@ -35,7 +46,6 @@ func main() {
 	if err != nil {
 		println(err)
 	}
-
 	var memStr string = "<tr>"
 	tokens := strings.Split(line, " ")
 	for _, t := range tokens {
@@ -44,11 +54,9 @@ func main() {
 		}
 	}
 	memStr += "</tr>"
-
 	err, processes := getProcessInfo()
-
 	var str string = ""
-	for _, p := range  reverse(processes) {
+	for _, p := range reverse(processes) {
 		str += "<tr>" +
 			"<td> " + strconv.Itoa(p.pid) + " </td>" +
 			"<td>" + strconv.FormatFloat(p.cpu, 'f', -1, 32) + " % </td>" +
@@ -56,45 +64,43 @@ func main() {
 			"<td> " + p.command + "</td>" +
 			"</tr>"
 	}
-
 	to := "gaoxun@loex.com"
 	subject := "【LOEX服务器监控】"
-
 	body := `
-			<html>
-			<body>
-			<H1>系统信息</H1>
-			<h5>主机名：` + hostname + `</h5>
-			<h5>内存状态：</h5>
-			<table border="1" style="width: 80%;">
-	          <tr>
-	             <th>type</th>
-	             <th>total</th>
-	             <th>used</th>
-	             <th>free</th>
-	             <th>shared</th>
-	             <th>buffCache</th>
-	             <th>available</th>
-	          </tr>
-	         
-	            ` + memStr + `
-	          
-	        </table>
-			<H1>进程信息(TOP 10)</H1>
-			<table border="1" style="width: 80%;">
-	          <tr>
-	             <th>进程号</th>
-	             <th>CPU使用率</th>
-	             <th>内存使用率</th>
-	             <th>命令</th>
-	          </tr>
-	         
-	            ` + str + `
-	          
-	        </table>
-			</body>
-			</html>
-			`
+				<html>
+				<body>
+				<H1>系统信息</H1>
+				<h5>主机名：` + hostname + `</h5>
+				<h5>内存状态：</h5>
+				<table border="1" style="width: 80%;">
+		          <tr>
+		             <th>type</th>
+		             <th>total</th>
+		             <th>used</th>
+		             <th>free</th>
+		             <th>shared</th>
+		             <th>buffCache</th>
+		             <th>available</th>
+		          </tr>
+		         
+		            ` + memStr + `
+		          
+		        </table>
+				<H1>进程信息(TOP 10)</H1>
+				<table border="1" style="width: 80%;">
+		          <tr>
+		             <th>进程号</th>
+		             <th>CPU使用率</th>
+		             <th>内存使用率</th>
+		             <th>命令</th>
+		          </tr>
+		         
+		            ` + str + `
+		          
+		        </table>
+				</body>
+				</html>
+				`
 	fmt.Println("send email")
 	err = mail.SendToMail(to, subject, body, "html")
 	if err != nil {
@@ -103,7 +109,6 @@ func main() {
 	} else {
 		fmt.Println("Send mail success!")
 	}
-
 }
 
 func getProcessInfo() (error, []*Process) {
