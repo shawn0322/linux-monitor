@@ -120,7 +120,7 @@ func main() {
 }
 
 func getProcessInfo() (error, []*Process) {
-	cmd := exec.Command("ps", "aux")
+	cmd := exec.Command("ps", "aux"," --sort=-%cpu")
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	err := cmd.Run()
