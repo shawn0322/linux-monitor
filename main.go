@@ -22,15 +22,12 @@ type Process struct {
 
 func main() {
 	sendMail()
-	ticker:=time.NewTicker(time.Second*60 * 1)
+	ticker:=time.NewTicker(time.Second*5)
 	go func() {        for _=range ticker.C {
 		sendMail()
 	}
 	}()
 	time.Sleep(time.Minute)
-
-
-
 }
 
 func sendMail() {
