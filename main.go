@@ -19,7 +19,6 @@ type Process struct {
 	command string
 }
 
-
 func main() {
 	sendMail()
 	c := cron.New()
@@ -29,12 +28,102 @@ func main() {
 	})
 	c.Start()
 
-	select{}
+	select {}
 
 }
 
 func sendMail() {
 	hostname, err := os.Hostname()
+
+	memInfo := getMemInfo()
+	prcInfo := getProcessInfo()
+	diskInfo := getDiskInfo();
+	to := "gaoxun@loex.com"
+	subject := "【LOEX服务器监控】"
+	body := `
+						<html>
+						<body>
+						<H1>系统信息</H1>
+						<h5>主机名：` + hostname + `</h5>
+						<h5>内存状态：</h5>
+						<table border="1" style="width: 80%;">
+				          <tr>
+				             <th>type</th>
+				             <th>total</th>
+				             <th>used</th>
+				             <th>free</th>
+				             <th>shared</th>
+				             <th>buffCache</th>
+				             <th>available</th>
+				          </tr>
+				         
+				            ` + memInfo + `
+
+				        </table>
+						<h5>磁盘状态：</h5>
+						<table border="1" style="width: 80%;">
+				          <tr>
+				             <th>Filesystem</th>
+				             <th>Size</th>
+				             <th>Used</th>
+				             <th>Avail</th>
+				             <th>shared</th>
+				             <th>Use%</th>
+				             <th>Mounted on</th>
+				          </tr>
+				         
+				            ` + diskInfo + `
+				          
+				        </table>
+						<H1>进程信息</H1>
+						<table border="1" style="width: 80%;">
+				          <tr>
+				             <th>进程号</th>
+				             <th>CPU使用率</th>
+				             <th>内存使用率</th>
+				             <th>命令</th>
+				          </tr>
+				         
+				            ` + prcInfo + `
+				          
+				        </table>
+						</body>
+						</html>
+						`
+	fmt.Println("send email")
+	err = mail.SendToMail(to, subject, body, "html")
+	if err != nil {
+		fmt.Println("Send mail error!")
+		fmt.Println(err)
+	} else {
+		fmt.Println("Send mail success!")
+	}
+}
+func getDiskInfo() string {
+	cmd := exec.Command("df", "-h")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		log.Fatal(err)
+	}
+	out.ReadString('\n')
+	line, err := out.ReadString('\n')
+	if err != nil {
+		log.Fatal(err)
+	}
+	var memStr string = "<tr>"
+	tokens := strings.Split(line, " ")
+	for _, t := range tokens {
+		if t != "" && t != "\t" {
+			memStr += "<td>" + t + "</td>"
+		}
+	}
+	println(memStr)
+	return memStr;
+}
+
+func getMemInfo() string {
 	cmd := exec.Command("free", "-h")
 	var out bytes.Buffer
 	cmd.Stdout = &out
@@ -45,7 +134,7 @@ func sendMail() {
 	out.ReadString('\n')
 	line, err := out.ReadString('\n')
 	if err != nil {
-		println(err)
+		log.Fatal(err)
 	}
 	var memStr string = "<tr>"
 	tokens := strings.Split(line, " ")
@@ -55,67 +144,10 @@ func sendMail() {
 		}
 	}
 	memStr += "</tr>"
-	err, processes := getProcessInfo()
-	var str string = ""
-	for _, p := range reverse(processes) {
-
-		if(p.cpu > 0) {
-			str += "<tr>" +
-				"<td> " + strconv.Itoa(p.pid) + " </td>" +
-				"<td>" + strconv.FormatFloat(p.cpu, 'f', -1, 32) + " % </td>" +
-				"<td>" + strconv.FormatFloat(p.mem, 'f', -1, 32) + " %</td>" +
-				"<td> " + p.command + "</td>" +
-				"</tr>"
-		}
-	}
-	to := "gaoxun@loex.com"
-	subject := "【LOEX服务器监控】"
-	body := `
-				<html>
-				<body>
-				<H1>系统信息</H1>
-				<h5>主机名：` + hostname + `</h5>
-				<h5>内存状态：</h5>
-				<table border="1" style="width: 80%;">
-		          <tr>
-		             <th>type</th>
-		             <th>total</th>
-		             <th>used</th>
-		             <th>free</th>
-		             <th>shared</th>
-		             <th>buffCache</th>
-		             <th>available</th>
-		          </tr>
-		         
-		            ` + memStr + `
-		          
-		        </table>
-				<H1>进程信息</H1>
-				<table border="1" style="width: 80%;">
-		          <tr>
-		             <th>进程号</th>
-		             <th>CPU使用率</th>
-		             <th>内存使用率</th>
-		             <th>命令</th>
-		          </tr>
-		         
-		            ` + str + `
-		          
-		        </table>
-				</body>
-				</html>
-				`
-	fmt.Println("send email")
-	err = mail.SendToMail(to, subject, body, "html")
-	if err != nil {
-		fmt.Println("Send mail error!")
-		fmt.Println(err)
-	} else {
-		fmt.Println("Send mail success!")
-	}
+	return memStr
 }
 
-func getProcessInfo() (error, []*Process) {
+func getProcessInfo() string {
 	cmd := exec.Command("ps", "aux")
 	var out bytes.Buffer
 	cmd.Stdout = &out
@@ -153,7 +185,20 @@ func getProcessInfo() (error, []*Process) {
 		command := ft[10]
 		processes = append(processes, &Process{pid, cpu, mem, command})
 	}
-	return err, processes
+
+	var str string = ""
+	for _, p := range reverse(processes) {
+
+		if (p.cpu > 0) {
+			str += "<tr>" +
+				"<td> " + strconv.Itoa(p.pid) + " </td>" +
+				"<td>" + strconv.FormatFloat(p.cpu, 'f', -1, 32) + " % </td>" +
+				"<td>" + strconv.FormatFloat(p.mem, 'f', -1, 32) + " %</td>" +
+				"<td> " + p.command + "</td>" +
+				"</tr>"
+		}
+	}
+	return str
 }
 
 func reverse(s []*Process) []*Process {
