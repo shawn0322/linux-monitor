@@ -48,16 +48,13 @@ func main() {
 	err, processes := getProcessInfo()
 
 	var str string = ""
-	for index, p := range  reverse(processes) {
+	for _, p := range  reverse(processes) {
 		str += "<tr>" +
 			"<td> " + strconv.Itoa(p.pid) + " </td>" +
 			"<td>" + strconv.FormatFloat(p.cpu, 'f', -1, 32) + " % </td>" +
 			"<td>" + strconv.FormatFloat(p.mem, 'f', -1, 32) + " %</td>" +
 			"<td> " + p.command + "</td>" +
 			"</tr>"
-		if index > 9 {
-			break
-		}
 	}
 
 	to := "gaoxun@loex.com"
