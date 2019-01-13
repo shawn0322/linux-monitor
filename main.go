@@ -107,15 +107,19 @@ func getDiskInfo() string {
 		log.Fatal(err)
 	}
 	out.ReadString('\n')
-	line, err := out.ReadString('\n')
-	if err != nil {
-		log.Fatal(err)
-	}
+
 	var memStr string = "<tr>"
-	tokens := strings.Split(line, " ")
-	for _, t := range tokens {
-		if t != "" && t != "\t" {
-			memStr += "<td>" + t + "</td>"
+	for {
+		line, err := out.ReadString('\n')
+		if err != nil {
+			log.Fatal(err)
+			break
+		}
+		tokens := strings.Split(line, " ")
+		for _, t := range tokens {
+			if t != "" && t != "\t" {
+				memStr += "<td>" + t + "</td>"
+			}
 		}
 	}
 	println(memStr)
