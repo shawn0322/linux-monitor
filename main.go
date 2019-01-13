@@ -112,7 +112,6 @@ func getDiskInfo() string {
 	for {
 		line, err := out.ReadString('\n')
 		if err != nil {
-			log.Fatal(err)
 			break
 		}
 		tokens := strings.Split(line, " ")
@@ -122,6 +121,7 @@ func getDiskInfo() string {
 			}
 		}
 	}
+	memStr += "</tr>"
 	println(memStr)
 	return memStr;
 }
