@@ -6,10 +6,10 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
-	"time"
 	"os"
 	"fmt"
 	"./mail"
+	"github.com/robfig/cron"
 )
 
 type Process struct {
@@ -22,12 +22,15 @@ type Process struct {
 
 func main() {
 	sendMail()
-	ticker:=time.NewTicker(time.Second*5)
-	go func() {        for _=range ticker.C {
+	c := cron.New()
+	spec := "0 0/1 * * * ?"
+	c.AddFunc(spec, func() {
 		sendMail()
-	}
-	}()
-	time.Sleep(time.Minute)
+	})
+	c.Start()
+
+	select{}
+
 }
 
 func sendMail() {
