@@ -18,14 +18,6 @@ type Process struct {
 	command string
 }
 
-type Memary struct {
-	total     int64
-	used      int64
-	free      int64
-	shared    int64
-	buffCache int64
-	available int64
-}
 
 func main() {
 
@@ -56,16 +48,14 @@ func main() {
 	err, processes := getProcessInfo()
 
 	var str string = ""
-	var i = 0
-	for _, p := range processes {
-		i++
+	for index, p := range  reverse(processes) {
 		str += "<tr>" +
 			"<td> " + strconv.Itoa(p.pid) + " </td>" +
 			"<td>" + strconv.FormatFloat(p.cpu, 'f', -1, 32) + " % </td>" +
 			"<td>" + strconv.FormatFloat(p.mem, 'f', -1, 32) + " %</td>" +
 			"<td> " + p.command + "</td>" +
 			"</tr>"
-		if i > 9 {
+		if index > 9 {
 			break
 		}
 	}
@@ -120,7 +110,7 @@ func main() {
 }
 
 func getProcessInfo() (error, []*Process) {
-	cmd := exec.Command("ps", "aux",":sort=-%cpu")
+	cmd := exec.Command("ps", "aux")
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	err := cmd.Run()
@@ -158,4 +148,11 @@ func getProcessInfo() (error, []*Process) {
 		processes = append(processes, &Process{pid, cpu, mem, command})
 	}
 	return err, processes
+}
+
+func reverse(s []*Process) []*Process {
+	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+		s[i], s[j] = s[j], s[i]
+	}
+	return s
 }
