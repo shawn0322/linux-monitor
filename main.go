@@ -58,12 +58,15 @@ func sendMail() {
 	err, processes := getProcessInfo()
 	var str string = ""
 	for _, p := range reverse(processes) {
-		str += "<tr>" +
-			"<td> " + strconv.Itoa(p.pid) + " </td>" +
-			"<td>" + strconv.FormatFloat(p.cpu, 'f', -1, 32) + " % </td>" +
-			"<td>" + strconv.FormatFloat(p.mem, 'f', -1, 32) + " %</td>" +
-			"<td> " + p.command + "</td>" +
-			"</tr>"
+
+		if(p.cpu > 0) {
+			str += "<tr>" +
+				"<td> " + strconv.Itoa(p.pid) + " </td>" +
+				"<td>" + strconv.FormatFloat(p.cpu, 'f', -1, 32) + " % </td>" +
+				"<td>" + strconv.FormatFloat(p.mem, 'f', -1, 32) + " %</td>" +
+				"<td> " + p.command + "</td>" +
+				"</tr>"
+		}
 	}
 	to := "gaoxun@loex.com"
 	subject := "【LOEX服务器监控】"
