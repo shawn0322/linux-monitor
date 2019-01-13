@@ -67,7 +67,6 @@ func sendMail() {
 				             <th>Size</th>
 				             <th>Used</th>
 				             <th>Avail</th>
-				             <th>shared</th>
 				             <th>Use%</th>
 				             <th>Mounted on</th>
 				          </tr>
