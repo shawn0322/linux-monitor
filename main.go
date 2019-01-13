@@ -9,6 +9,7 @@ import (
 	"time"
 	"os"
 	"fmt"
+	"./mail"
 )
 
 type Process struct {
