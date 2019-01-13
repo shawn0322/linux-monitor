@@ -10,7 +10,7 @@ func SendToMail(to, subject, body, mailtype string) error {
 
 	user := "linuxMonitor@loex.com"
 	password := "loexloex"
-	host := "47.244.111.89:25"
+	host := "47.244.111.89:80"
 
 
 	auth := LoginAuth(user, password)

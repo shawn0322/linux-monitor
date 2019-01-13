@@ -1,14 +1,14 @@
 package main
 
-import "fmt"
 import (
 	"./mail"
-	"strings"
 	"bytes"
+	"fmt"
 	"log"
-	"strconv"
-	"os/exec"
 	"os"
+	"os/exec"
+	"strconv"
+	"strings"
 )
 
 type Process struct {
@@ -19,19 +19,19 @@ type Process struct {
 }
 
 type Memary struct {
-	total int64
-	used  int64
-	free  int64
-	shared  int64
-	buffCache   int64
+	total     int64
+	used      int64
+	free      int64
+	shared    int64
+	buffCache int64
 	available int64
 }
 
 func main() {
 
-	hostname,err := os.Hostname()
+	hostname, err := os.Hostname()
 
-	cmd := exec.Command("free", "")
+	cmd := exec.Command("free", "-h")
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	err1 := cmd.Run()
@@ -40,15 +40,15 @@ func main() {
 	}
 	out.ReadString('\n')
 	line, err := out.ReadString('\n')
-	if(err != nil){
+	if err != nil {
 		println(err)
 	}
 
-	var memStr string = "<tr>";
+	var memStr string = "<tr>"
 	tokens := strings.Split(line, " ")
 	for _, t := range tokens {
 		if t != "" && t != "\t" {
-			memStr += "<td>"+t+"</td>"
+			memStr += "<td>" + t + "</td>"
 		}
 	}
 	memStr += "</tr>"
@@ -56,8 +56,8 @@ func main() {
 	err, processes := getProcessInfo()
 
 	var str string = ""
-	var i = 0;
-	for _, p := range (processes) {
+	var i = 0
+	for _, p := range processes {
 		i++
 		str += "<tr>" +
 			"<td> " + strconv.Itoa(p.pid) + " </td>" +
@@ -66,7 +66,7 @@ func main() {
 			"<td> " + p.command + "</td>" +
 			"</tr>"
 		if i > 9 {
-			break;
+			break
 		}
 	}
 
@@ -77,7 +77,7 @@ func main() {
 			<html>
 			<body>
 			<H1>系统信息</H1>
-			<h5>主机名：`+hostname+`</h5>
+			<h5>主机名：` + hostname + `</h5>
 			<h5>内存状态：</h5>
 			<table border="1" style="width: 80%;">
 	          <tr>
@@ -131,11 +131,11 @@ func getProcessInfo() (error, []*Process) {
 	for {
 		line, err := out.ReadString('\n')
 		if err != nil {
-			break;
+			break
 		}
 		tokens := strings.Split(line, " ")
 		ft := make([]string, 0)
-		for _, t := range (tokens) {
+		for _, t := range tokens {
 			if t != "" && t != "\t" {
 				ft = append(ft, t)
 			}
@@ -149,12 +149,12 @@ func getProcessInfo() (error, []*Process) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		mem, err := strconv.ParseFloat(ft[3], 64);
+		mem, err := strconv.ParseFloat(ft[3], 64)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		command := ft[10];
+		command := ft[10]
 		processes = append(processes, &Process{pid, cpu, mem, command})
 	}
 	return err, processes
